@@ -15,7 +15,7 @@
 <body>
     <h1>Test</h1>
     <p>test</p>
-    <canvas width="300" height="600" id="canvas">
+    <canvas width="600" height="600" id="canvas">
         (HTML canvas support required)
     </canvas>
 
@@ -33,9 +33,9 @@
         const branchAngleDegrees = 45;
         const branchAngleRadians = degreesToRadians(branchAngleDegrees);
 
-        // approximate bottom-center
-        const startX = 150;
-        const startY = 280;
+        // approximate center
+        const startX = 300;
+        const startY = 300;
 
         const ctx = canvas.getContext("2d");
 
@@ -45,31 +45,33 @@
             ctx.moveTo(x, y);
 
             const tipY = y - branchLength * Math.sin(angle);
-            ctx.lineTo(x + x * Math.cos(angle), tipY);
+            const tipX = x + branchLength * Math.cos(angle);
+
+            ctx.lineTo(tipX, tipY);
             ctx.stroke();
 
-            ctx.beginPath();
+            if (level < maxDepth) {
+                const attachmentPointX = x + (branchLength * baseRatio) * Math.cos(angle);
+                const attachmentPointY = y - (branchLength * baseRatio) * Math.sin(angle);
 
-            level++;
+                ctx.moveTo(attachmentPointX, attachmentPointY);
+                
+                const newBranchLength = branchLength * branchLengthRatio;
 
-            const attachmentPointY = y - (branchLength * baseRatio) * Math.sin(angle);
-            const attachmentPointX = x + (branchLength * baseRatio) * Math.cos(angle);
+                drawTree(attachmentPointX, attachmentPointY, newBranchLength, branchAngleRadians + angle, level + 1);
+                drawTree(attachmentPointX, attachmentPointY, newBranchLength, angle - branchAngleRadians, level + 1);
+            }
 
-            ctx.moveTo(attachmentPointX, attachmentPointY);
+            // ctx.lineTo(
+            //     attachmentPointX + newBranchLength * Math.cos(branchAngleRadians + angle),
+            //     attachmentPointY - newBranchLength * Math.sin(branchAngleRadians + angle));
 
-            const newBranchLength = branchLength * branchLengthRatio;
+            // ctx.moveTo(attachmentPointX, attachmentPointY);
+            // ctx.lineTo(
+            //     attachmentPointX + newBranchLength * Math.cos(branchAngleRadians - angle),
+            //     attachmentPointY + newBranchLength * Math.sin(branchAngleRadians - angle));
 
-            ctx.lineTo(
-                attachmentPointX + newBranchLength * Math.cos(branchAngleRadians + angle),
-                attachmentPointY - newBranchLength * Math.sin(branchAngleRadians + angle));
-
-            ctx.moveTo(attachmentPointX, attachmentPointY);
-            ctx.lineTo(
-                attachmentPointX + newBranchLength * Math.cos(branchAngleRadians - angle),
-                attachmentPointY + newBranchLength * Math.sin(branchAngleRadians - angle));
-
-            //ctx.lineTo(x - (newBranchLength / 2), attachmentPointY - (newBranchLength / 2));
-            ctx.stroke();
+            // ctx.stroke();
         }
         
         const startAngle = degreesToRadians(90);
