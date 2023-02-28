@@ -1,0 +1,86 @@
+
+<!doctype html>
+<html>
+    <head>
+        <title>Fractal Tree Generator</title>
+        <meta name="description" content="Fractal Tree Generator">
+        <meta name="keywords" content="Fractal Tree Generator">
+
+        <style>
+            canvas {
+                border: 1px solid black;
+            }
+        </style>
+    </head>
+<body>
+    <h1>Test</h1>
+    <p>test</p>
+    <canvas width="300" height="600" id="canvas">
+        (HTML canvas support required)
+    </canvas>
+
+    <script type="text/javascript">
+        const canvas = document.getElementById("canvas");
+        
+        if (!canvas.getContext) {
+            alert("HTML canvas support required");
+        }
+
+        const branchLength = 150;
+        const baseRatio = 0.50;
+        const branchLengthRatio = 0.4;
+        const maxDepth = 1;
+        const branchAngleDegrees = 45;
+        const branchAngleRadians = degreesToRadians(branchAngleDegrees);
+
+        // approximate bottom-center
+        const startX = 150;
+        const startY = 280;
+
+        const ctx = canvas.getContext("2d");
+
+        function drawTree(x, y, branchLength, angle, level=0) {
+
+            ctx.beginPath();
+            ctx.moveTo(x, y);
+
+            const tipY = y - branchLength * Math.sin(angle);
+            ctx.lineTo(x + x * Math.cos(angle), tipY);
+            ctx.stroke();
+
+            ctx.beginPath();
+
+            level++;
+
+            const attachmentPointY = y - (branchLength * baseRatio) * Math.sin(angle);
+            const attachmentPointX = x + (branchLength * baseRatio) * Math.cos(angle);
+
+            ctx.moveTo(attachmentPointX, attachmentPointY);
+
+            const newBranchLength = branchLength * branchLengthRatio;
+
+            ctx.lineTo(
+                attachmentPointX + newBranchLength * Math.cos(branchAngleRadians + angle),
+                attachmentPointY - newBranchLength * Math.sin(branchAngleRadians + angle));
+
+            ctx.moveTo(attachmentPointX, attachmentPointY);
+            ctx.lineTo(
+                attachmentPointX + newBranchLength * Math.cos(branchAngleRadians - angle),
+                attachmentPointY + newBranchLength * Math.sin(branchAngleRadians - angle));
+
+            //ctx.lineTo(x - (newBranchLength / 2), attachmentPointY - (newBranchLength / 2));
+            ctx.stroke();
+        }
+        
+        const startAngle = degreesToRadians(90);
+        drawTree(startX, startY, branchLength, startAngle);
+        
+        function degreesToRadians(degrees) {
+            return degrees * (Math.PI / 180);
+        }
+
+
+
+    </script>
+</body>
+</html>
