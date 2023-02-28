@@ -107,8 +107,10 @@
                     ctx.moveTo(attachmentPointX, attachmentPointY);
                     const newBranchLength = branchLength * branchLengthRatio;
 
+                    // left, right, and top, respectively
                     drawTree(attachmentPointX, attachmentPointY, newBranchLength, branchAngleRadians + angle, level + 1);
                     drawTree(attachmentPointX, attachmentPointY, newBranchLength, angle - branchAngleRadians, level + 1);
+                    drawTree(attachmentPointX, attachmentPointY, newBranchLength, angle, level + 1);
                 }
 
                 ctx.stroke();
