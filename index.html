@@ -14,6 +14,17 @@
     </head>
 <body>
     <h1>Fractal Tree Generator</h1>
+
+    <div>
+        <label>branch angle°</label><input type="number" id="branchAngleDegrees" class="ftg-input" value="24" step="1">
+        <label>num. branches</label><input type="number" id="numBranches" class="ftg-input" value="3" step="1">
+        <label>branch levels</label><input type="number" id="maxDepth" class="ftg-input" value="4" step="1">
+    </div>
+    <div>
+        <label>sub-branch ratio</label><input type="number" id="branchLengthRatio" class="ftg-input" value="0.5" step="0.02">
+        <label>trunk ratio</label><input type="number" id="trunkBaseRatio" class="ftg-input" value="0.1" step="0.05">
+    </div>
+
     <canvas width="600" height="800" id="canvas">
         (HTML canvas support required)
     </canvas>
@@ -26,13 +37,30 @@
         }
 
         const branchLength = 250;
-        const trunkBaseRatio = 0.0; // reserve the bottom X% for trunk only
-        const branchLengthRatio = 0.5;
-        const maxDepth = 4;
-        const branchAngleDegrees = 24;
-        const branchAngleRadians = degreesToRadians(branchAngleDegrees);
 
-        const numForks = 3; // evenly distributed over the trunk, excluding the trunkBaseRatio
+        const branchAngleInput = document.getElementById('branchAngleDegrees');
+        const numBranchesInput = document.getElementById('numBranches');
+        const maxDepthInput = document.getElementById('maxDepth');
+        const branchLengthRatioInput = document.getElementById('branchLengthRatio');
+        const trunkBaseRatioInput = document.getElementById('trunkBaseRatio');
+
+        let branchAngleDegrees;
+        let numBranches; // evenly distributed over the trunk, excluding the trunkBaseRatio
+        let maxDepth;
+        let branchLengthRatio;
+        let branchAngleRadians;
+        let trunkBaseRatio; // reserve the bottom X% for trunk only
+
+        function refreshVariables() {
+            branchAngleDegrees = parseInt(branchAngleInput.value, 10);
+            numBranches = parseInt(numBranchesInput.value, 10);
+            maxDepth = parseInt(maxDepthInput.value, 10);
+            branchLengthRatio = parseFloat(branchLengthRatioInput.value);
+            trunkBaseRatio = parseFloat(trunkBaseRatioInput.value);
+            branchAngleRadians = degreesToRadians(branchAngleDegrees);
+        }
+
+        //console.log({branchAngleDegrees, numBranches, maxDepth, branchLengthRatio, trunkBaseRatio})
 
         // angle, length, and fork variance for randomness?
 
@@ -40,7 +68,20 @@
         const startX = 300;
         const startY = 400;
 
-        const ctx = canvas.getContext("2d");
+        const ctx = canvas.getContext('2d');
+
+        const inputs = document.getElementsByClassName('ftg-input');
+
+        function generateFractalTree() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            refreshVariables();
+            drawTree(startX, startY, branchLength);
+        }
+
+        for (let i = 0; i < inputs.length; i++) {
+            inputs[i].addEventListener('keyup', generateFractalTree);
+            inputs[i].addEventListener('change', generateFractalTree);
+        }
 
         function drawTree(x, y, branchLength, angle=degreesToRadians(90), level=0) {
 
@@ -55,11 +96,11 @@
 
             if (level < maxDepth) {
 
-                const diffRatio = (1.0 - trunkBaseRatio) / (numForks + 1);
+                const diffRatio = (1.0 - trunkBaseRatio) / (numBranches + 1);
                 const diffX = branchLength * diffRatio * Math.cos(angle);
                 const diffY = branchLength * diffRatio * Math.sin(angle);
 
-                for (let i = 0; i < numForks; i++) {
+                for (let i = 0; i < numBranches; i++) {
                     const attachmentPointX = tipX - diffX * (i + 1);
                     const attachmentPointY = tipY + diffY * (i + 1);
 
@@ -84,7 +125,7 @@
             }
         }
         
-        drawTree(startX, startY, branchLength);
+        generateFractalTree();
         
         function degreesToRadians(degrees) {
             return degrees * (Math.PI / 180);
