@@ -16,18 +16,33 @@
     <h1>Fractal Tree Generator</h1>
 
     <div>
-        <label>branch angle°</label><input type="number" id="branchAngleDegrees" class="ftg-input" value="48" step="1">
-        <label>num. branches</label><input type="number" id="numBranches" class="ftg-input" value="3" step="1">
-        <label>branch levels</label><input type="number" id="maxDepth" class="ftg-input" value="4" step="1">
+        <label>branch angle°:</label><input type="number" id="branchAngleDegrees" class="ftg-input" value="48" step="1">
+        <label>num. branches:</label><input type="number" name="numBranches" id="numBranches" class="ftg-input" value="3" step="1">
+        <label>branch levels:</label><input type="number" id="maxDepth" class="ftg-input" value="4" step="1">
     </div>
     <div>
-        <label>sub-branch ratio</label><input type="number" id="branchLengthRatio" class="ftg-input" value="0.5" step="0.02">
-        <label>trunk ratio</label><input type="number" id="trunkBaseRatio" class="ftg-input" value="0.1" step="0.05">
+        <label title="sub-branch ratio">tree age:</label><input type="number" id="branchLengthRatio" class="ftg-input" value="0.5" step="0.02">
+        <label>trunk ratio:</label><input type="number" id="trunkBaseRatio" class="ftg-input" value="0.1" step="0.05">
     </div>
 
-    <canvas width="600" height="800" id="canvas">
+    <canvas width="600" height="500" id="canvas">
         (HTML canvas support required)
     </canvas>
+
+    <p>
+        This is just a little toy I envisioned after observing the silhouettes of 
+        trees in my neighborhood as a storm blew in. I noticed the fractals within 
+        the different species of trees nearby and imagined a tool to
+        experiment with the patterns.
+    </p>
+    <p>
+        Fun things to try from the default settings:
+
+        <ul>
+            <li>Modify the trunk ratio to see different tree structures (around 0.8 looks like certain African trees, especially with a branch level of 5)</li>
+            <li>Different types of trees can be created by experimenting with the branch angle (you can get evergreen trees around 140 - tweak the trunk ratio as well)</li>
+        </ul>
+    </p>
 
     <script type="text/javascript">
         const canvas = document.getElementById("canvas");
@@ -60,13 +75,11 @@
             branchAngleRadians = degreesToRadians(branchAngleDegrees);
         }
 
-        //console.log({branchAngleDegrees, numBranches, maxDepth, branchLengthRatio, trunkBaseRatio})
-
         // angle, length, and fork variance for randomness?
 
         // approximate center
         const startX = 300;
-        const startY = 400;
+        const startY = 500;
 
         const ctx = canvas.getContext('2d');
 
@@ -114,16 +127,6 @@
                 }
 
                 ctx.stroke();
-
-                //const attachmentPointX = x + offsetX + (branchLength * trunkBaseRatio) * Math.cos(angle);
-                //const attachmentPointY = y - offsetY - (branchLength * trunkBaseRatio) * Math.sin(angle);
-
-                //ctx.moveTo(attachmentPointX, attachmentPointY);
-                
-                // const newBranchLength = branchLength * branchLengthRatio;
-
-                // drawTree(attachmentPointX, attachmentPointY, newBranchLength, branchAngleRadians + angle, level + 1);
-                // drawTree(attachmentPointX, attachmentPointY, newBranchLength, angle - branchAngleRadians, level + 1);
             }
         }
         
@@ -132,8 +135,6 @@
         function degreesToRadians(degrees) {
             return degrees * (Math.PI / 180);
         }
-
-
 
     </script>
 </body>
