@@ -23,6 +23,7 @@
     <div>
         <label title="sub-branch ratio">tree age:</label><input type="number" id="branchLengthRatio" class="ftg-input" value="0.5" step="0.02">
         <label>trunk ratio:</label><input type="number" id="trunkBaseRatio" class="ftg-input" value="0.1" step="0.05">
+        <label>droop:</label><input type="number" id="droop" class="ftg-input" value="5" step="5">
     </div>
 
     <canvas width="600" height="500" id="canvas">
@@ -60,21 +61,22 @@
         const maxDepthInput = document.getElementById('maxDepth');
         const branchLengthRatioInput = document.getElementById('branchLengthRatio');
         const trunkBaseRatioInput = document.getElementById('trunkBaseRatio');
+        const droopInput = document.getElementById('droop');
 
-        let branchAngleDegrees;
         let numBranches; // evenly distributed over the trunk, excluding the trunkBaseRatio
         let maxDepth;
         let branchLengthRatio;
         let branchAngleRadians;
         let trunkBaseRatio; // reserve the bottom X% for trunk only
+        let droop;
 
         function refreshVariables() {
-            branchAngleDegrees = parseInt(branchAngleInput.value, 10);
+            branchAngleRadians = degreesToRadians(parseInt(branchAngleInput.value, 10));
             numBranches = parseInt(numBranchesInput.value, 10);
             maxDepth = parseInt(maxDepthInput.value, 10);
             branchLengthRatio = parseFloat(branchLengthRatioInput.value);
             trunkBaseRatio = parseFloat(trunkBaseRatioInput.value);
-            branchAngleRadians = degreesToRadians(branchAngleDegrees);
+            droopRadians = degreesToRadians(parseInt(droopInput.value, 10));
         }
 
         // angle, length, and fork variance for randomness?
@@ -104,16 +106,42 @@
 
             ctx.moveTo(x, y);
 
-            const tipY = y - branchLength * Math.sin(angle);
-            const tipX = x + branchLength * Math.cos(angle);
+            angle = normalize(angle);
+
+            let droopPerLevel = droopRadians * level;
+
+            // right side of tree, droop should be negative
+            if (Math.cos(angle) > 0) {
+                droopPerLevel *= -1;
+            }
+
+            const verticalAngle = Math.abs(Math.sin(angle)) === 1;
+            const xDroopPerLevel = verticalAngle ? 0 : droopPerLevel; // don't apply droop to the X coordinate if vertical (droop on the "Z-axis" for symmetry)
+
+            let effectiveX = normalize(angle + xDroopPerLevel);
+            let effectiveY = normalize(angle + droopPerLevel);
+
+            const straightDown = 3 * Math.PI / 2;
+
+            // don't allow droop to curve back around (even though it's kind of fun)
+            if (crossesOverStraightDown(angle, effectiveX)) {
+                effectiveX = straightDown;
+            }
+
+            if (crossesOverStraightDown(angle, effectiveY)) {
+                effectiveY = straightDown;
+            }
+            
+            const tipX = x + branchLength * Math.cos(effectiveX);
+            const tipY = y - branchLength * Math.sin(effectiveY);
 
             ctx.lineTo(tipX, tipY);
 
             if (level < maxDepth) {
 
                 const diffRatio = (1.0 - trunkBaseRatio) / (numBranches + 1);
-                const diffX = branchLength * diffRatio * Math.cos(angle);
-                const diffY = branchLength * diffRatio * Math.sin(angle);
+                const diffX = branchLength * diffRatio * Math.cos(effectiveX);
+                const diffY = branchLength * diffRatio * Math.sin(effectiveY);
 
                 for (let i = 0; i < numBranches; i++) {
                     const attachmentPointX = tipX - diffX * (i + 1);
@@ -133,6 +161,48 @@
         
         function degreesToRadians(degrees) {
             return degrees * (Math.PI / 180);
+        }
+
+        function normalize(radians) {
+            while (radians < 0) {
+                radians += Math.PI * 2;
+            }
+
+            while (radians > Math.PI * 2) {
+                radians -= Math.PI * 2;
+            }
+
+            return radians;
+        }
+
+        function crossesOverStraightDown(angle1, angle2) {
+            const quadrants = getQuadrants(angle1).concat(getQuadrants(angle2));
+            return (
+                (quadrants.includes(3) && quadrants.includes(4)) ||
+                (quadrants.includes(2) && quadrants.includes(4)) ||
+                (quadrants.includes(1) && quadrants.includes(3)));
+        }
+
+        function getQuadrants(radians) {
+            radians = normalize(radians);
+
+            const quadrants = [];
+
+            for (let i = 0; i < 4; i++) {
+                const lowerBound = i * Math.PI / 2;
+                const upperBound = (i + 1) * Math.PI / 2;
+
+                if (radians >= lowerBound && radians <= upperBound) {
+                    if (radians === 0 || radians === Math.PI * 2) {
+                        quadrants.push(1);
+                        quadrants.push(4);
+                    } else {
+                        quadrants.push(i + 1);
+                    }
+                }
+            }
+
+            return quadrants;
         }
 
     </script>
