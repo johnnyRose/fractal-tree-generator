@@ -45,10 +45,12 @@
     </p>
 
     <script type="text/javascript">
-        const canvas = document.getElementById("canvas");
+        const canvas = document.getElementById('canvas');
         
         if (!canvas.getContext) {
-            alert("HTML canvas support required");
+            const message = 'HTML canvas support required';
+            alert(message);
+            throw new Error(message);
         }
 
         const branchLength = 250;
@@ -86,9 +88,11 @@
         const inputs = document.getElementsByClassName('ftg-input');
 
         function generateFractalTree() {
+            ctx.beginPath();
             ctx.clearRect(0, 0, canvas.width, canvas.height);
             refreshVariables();
             drawTree(startX, startY, branchLength);
+            ctx.stroke();
         }
 
         for (let i = 0; i < inputs.length; i++) {
@@ -98,14 +102,12 @@
 
         function drawTree(x, y, branchLength, angle=degreesToRadians(90), level=0) {
 
-            ctx.beginPath();
             ctx.moveTo(x, y);
 
             const tipY = y - branchLength * Math.sin(angle);
             const tipX = x + branchLength * Math.cos(angle);
 
             ctx.lineTo(tipX, tipY);
-            ctx.stroke();
 
             if (level < maxDepth) {
 
@@ -117,7 +119,6 @@
                     const attachmentPointX = tipX - diffX * (i + 1);
                     const attachmentPointY = tipY + diffY * (i + 1);
 
-                    ctx.moveTo(attachmentPointX, attachmentPointY);
                     const newBranchLength = branchLength * branchLengthRatio;
 
                     // left, right, and top, respectively
@@ -125,8 +126,6 @@
                     drawTree(attachmentPointX, attachmentPointY, newBranchLength, angle - branchAngleRadians, level + 1);
                     drawTree(attachmentPointX, attachmentPointY, newBranchLength, angle, level + 1);
                 }
-
-                ctx.stroke();
             }
         }
         
